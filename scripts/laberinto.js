@@ -1,23 +1,28 @@
 "use strict";
 
 
-var TAM_BLOQUE = 8;
+var TAM_BLOQUE = 10;
 
 var freeCamera, canvas, engine, labScene;
 var camPositionInLabyrinth, camRotationInLabyrinth;
 var veloc = 0.5;
+var textoDoc;
+var vistaAerea = false;
 
 
-function cargarLaberinto(nombreDelMapa) 
-{
+function cargarLaberinto() 
+{   
+    //var mapa = ¿?
+    var pasoIntermedio = textoDoc.split("\r\n"),
+        ancho = parseInt(pasoIntermedio[0].split(": ")[1]),
+        largo = parseInt(pasoIntermedio[1].split(": ")[1]),
+        mapa = [];
+    for(var index = 2; index<largo+2; index++)
+    {
+        mapa[index-2] += pasoIntermedio[index];
+        mapa[index-2] = mapa[index-2].replace(/undefined/i, "");
+    }
 
-    //--------------------------------
-    //--------------------------------
-	// leer el fichero y guardarlo en una variable
-    //--------------------------------
-    //--------------------------------
-    var largo, ancho;
-	//var mapa = ¿?
 
     // Crear la escene a la cual le meteremos los elementos del mapa.
     var scene = new BABYLON.Scene(engine);
@@ -48,7 +53,7 @@ function cargarLaberinto(nombreDelMapa)
     groundMaterial.specularTexture = new BABYLON.Texture("textures/arfilaay.de_tiles-35_s100-g100-r100.jpg", scene);
     groundMaterial.specularTexture.uScale = ancho;
     groundMaterial.specularTexture.vScale = largo;
-    var ground = BABYLON.Mesh.CreateGround("ground", (ancho + 2) * BLOCK_SIZE, (ancho + 2) * BLOCK_SIZE, 1, scene, false);
+    var ground = BABYLON.Mesh.CreateGround("ground", (ancho + 2) * TAM_BLOQUE, (ancho + 2) * TAM_BLOQUE, 1, scene, false);
                       // Mesh.CreateGround(name,       width,                    height, subdivisions, scene, updatable) 
     ground.material = groundMaterial; 
     ground.checkCollisions = true;
@@ -91,7 +96,7 @@ function cargarLaberinto(nombreDelMapa)
     cubeMultiMat.subMaterials.push(cubeTopMaterial);
     cubeMultiMat.subMaterials.push(cubeWallMaterial);
 
-    var soloCube = BABYLON.Mesh.CreateBox("mainCube", BLOCK_SIZE, scene);
+    var soloCube = BABYLON.Mesh.CreateBox("mainCube", TAM_BLOQUE, scene);
     soloCube.subMeshes = [];
     soloCube.subMeshes.push(new BABYLON.SubMesh(0, 0, 4, 0, 6, soloCube));
     soloCube.subMeshes.push(new BABYLON.SubMesh(1, 4, 20, 6, 30, soloCube));
@@ -102,23 +107,23 @@ function cargarLaberinto(nombreDelMapa)
     soloCube.checkCollisions = true;
     soloCube.setEnabled(false);
     var cube,x,y;
-    for (var fila = 0; fila < mCount; fila++) 
+    for (var fila = 0; fila < largo; fila++) 
     {
-        for (var col = 0; col < mCount; col++) 
+        for (var col = 0; col < ancho; col++) 
         {
-            //--------------------------------
-            //--------------------------------
-            //PONER BIEN!! 
-            //--------------------------------
-            //--------------------------------
-            if (mapa = 'h') 
+            if (mapa[fila].charAt(col).toLowerCase() == 'h') 
             {
                 cube = soloCube.clone("ClonedCube" + fila + col);
-                cube.position = new BABYLON.Vector3(BLOCK_SIZE / 2 + (fila - (mCount / 2)) * BLOCK_SIZE,
-                                                    BLOCK_SIZE / 2,
-                                                    BLOCK_SIZE / 2 + (col - (mCount / 2)) * BLOCK_SIZE);
+                /*
+                cube.position = new BABYLON.Vector3(TAM_BLOQUE / 2 + (fila - (col / 2)) * TAM_BLOQUE,
+                                                    TAM_BLOQUE / 2,
+                                                    TAM_BLOQUE / 2 + (col - (fila / 2)) * TAM_BLOQUE);
+                */
+                cube.position = new BABYLON.Vector3(TAM_BLOQUE / 2 + (fila - (col / 2)) * TAM_BLOQUE,
+                                                    TAM_BLOQUE / 2,
+                                                    TAM_BLOQUE / 2 + (col - (fila / 2)) * TAM_BLOQUE);
             }
-            else if (mapa = 'e')
+            else if (mapa[fila].charAt(col).toLowerCase() == 'e')
             {
                 x = fila;
                 y = col;
@@ -130,6 +135,27 @@ function cargarLaberinto(nombreDelMapa)
     freeCamera.position = new BABYLON.Vector3(x, 5, y);
     //Cambia la posicion a la entrada
 
+     window.addEventListener("keydown", function (event) {
+        if (event.keyCode === 32) {
+            if (!vistaAerea) {
+                vistaAerea = true;
+                // Saving current position & rotation in the labyrinth
+                camPositionInLabyrinth = freeCamera.position;
+                camRotationInLabyrinth = freeCamera.rotation;
+                animateCameraPositionAndRotation(freeCamera, freeCamera.position,
+                    new BABYLON.Vector3(16, 400, 15),
+                    freeCamera.rotation,
+                    new BABYLON.Vector3(1.4912565104551518, -1.5709696842019767, freeCamera.rotation.z));
+            }
+            else {
+                vistaAerea = false;
+                animateCameraPositionAndRotation(freeCamera, freeCamera.position,
+                    camPositionInLabyrinth, freeCamera.rotation, camRotationInLabyrinth);
+            }
+            freeCamera.applyGravity = !vistaAerea;
+        }
+    }, false);
+    /*
     window.addEventListener("keydown", function (event) 
     {
         if (event.keyCode === 79) //codigo de la o
@@ -138,13 +164,13 @@ function cargarLaberinto(nombreDelMapa)
             {
                 switch(event.keyCode) 
                 {
-                    case /*tecla del obj*/:
+                    case tecla del obj:
                         //creo objeto en freeCampera.position
                         break;
                 }
             }, false);
         }
-    }, false);
+    }, false);*/
 
     window.addEventListener("keydown", function (event) 
     {
@@ -165,7 +191,6 @@ function cargarLaberinto(nombreDelMapa)
     return scene;
 };
 
-
 window.onload = function () {
     canvas = document.getElementById("canvas");
 
@@ -177,7 +202,8 @@ window.onload = function () {
         buttons: {
             "Create": function () {
                 //Creating scene
-                labScene = cargarLaberinto($("#name").val());
+
+                labScene = cargarLaberinto();
 
                 labScene.activeCamera.attachControl(canvas);
 
