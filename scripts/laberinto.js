@@ -1,7 +1,7 @@
 "use strict";
 
 
-var TAM_BLOQUE = 10;
+var TAM_BLOQUE = 8;
 
 var freeCamera, canvas, engine, labScene;
 var camPositionInLabyrinth, camRotationInLabyrinth;
@@ -119,14 +119,14 @@ function cargarLaberinto()
                                                     TAM_BLOQUE / 2,
                                                     TAM_BLOQUE / 2 + (col - (fila / 2)) * TAM_BLOQUE);
                 */
-                cube.position = new BABYLON.Vector3(TAM_BLOQUE / 2 + (fila - (col / 2)) * TAM_BLOQUE,
-                                                    TAM_BLOQUE / 2,
-                                                    TAM_BLOQUE / 2 + (col - (fila / 2)) * TAM_BLOQUE);
+                cube.position = new BABYLON.Vector3(TAM_BLOQUE / 2 + fila * TAM_BLOQUE,
+                                                    TAM_BLOQUE/2,
+                                                    TAM_BLOQUE / 2 + col * TAM_BLOQUE);
             }
             else if (mapa[fila].charAt(col).toLowerCase() == 'e')
             {
-                x = fila;
-                y = col;
+                x = TAM_BLOQUE / 2 + fila * TAM_BLOQUE;
+                y = TAM_BLOQUE / 2 + col * TAM_BLOQUE;
             }
 
         }
