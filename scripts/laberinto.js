@@ -44,16 +44,16 @@ function cargarLaberinto()
         // Nota u = ejeX   
         //      v = ejeY
     var groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
-    groundMaterial.emissiveTexture = new BABYLON.Texture("textures/arfilaay.de_tiles-35_d100.jpg", scene);
-    groundMaterial.emissiveTexture.uScale = ancho;
-    groundMaterial.emissiveTexture.vScale = largo;
-    groundMaterial.bumpTexture = new BABYLON.Texture("textures/arfilaay.de_tiles-35_b010.jpg", scene);
-    groundMaterial.bumpTexture.uScale = ancho;
-    groundMaterial.bumpTexture.vScale = largo;
-    groundMaterial.specularTexture = new BABYLON.Texture("textures/arfilaay.de_tiles-35_s100-g100-r100.jpg", scene);
-    groundMaterial.specularTexture.uScale = ancho;
-    groundMaterial.specularTexture.vScale = largo;
-    var ground = BABYLON.Mesh.CreateGround("ground", (ancho + 2) * TAM_BLOQUE, (ancho + 2) * TAM_BLOQUE, 1, scene, false);
+    groundMaterial.emissiveTexture = new BABYLON.Texture("textures/Ground/arfilaay.de_tiles-35_d100.jpg", scene);
+    groundMaterial.emissiveTexture.uScale = largo;
+    groundMaterial.emissiveTexture.vScale = ancho;
+    groundMaterial.bumpTexture = new BABYLON.Texture("textures/Ground/arfilaay.de_tiles-35_b010.jpg", scene);
+    groundMaterial.bumpTexture.uScale = largo;
+    groundMaterial.bumpTexture.vScale = ancho;
+    groundMaterial.specularTexture = new BABYLON.Texture("textures/Ground/arfilaay.de_tiles-35_s100-g100-r100.jpg", scene);
+    groundMaterial.specularTexture.uScale = largo;
+    groundMaterial.specularTexture.vScale = ancho;
+    var ground = BABYLON.Mesh.CreateGround("ground", TAM_BLOQUE / 2 + (largo + 2) * TAM_BLOQUE, TAM_BLOQUE / 2 + (ancho + 2) * TAM_BLOQUE, 1, scene, false);
                       // Mesh.CreateGround(name,       width,                    height, subdivisions, scene, updatable) 
     ground.material = groundMaterial; 
     ground.checkCollisions = true;
@@ -64,7 +64,7 @@ function cargarLaberinto()
     var skybox = BABYLON.Mesh.CreateBox("skyBox", 800.0, scene);
     var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
     skyboxMaterial.backFaceCulling = false;
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/skybox", scene); 
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/Skybox/sp2", scene); 
                                                 //CubeTexture(rootUrl, scene, extensions, noMipmap)
                                                     // rootUrl: Link of the texture
                                                     // extensions: The cube texture extensions. (Array)
@@ -89,9 +89,9 @@ function cargarLaberinto()
     var cubeTopMaterial = new BABYLON.StandardMaterial("cubeTop", scene);
     cubeTopMaterial.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.15);
     var cubeWallMaterial = new BABYLON.StandardMaterial("cubeWalls", scene);
-    cubeWallMaterial.emissiveTexture = new BABYLON.Texture("textures/masonry-wall-texture.jpg", scene);
-    cubeWallMaterial.bumpTexture = new BABYLON.Texture("textures/masonry-wall-bump-map.jpg", scene);
-    cubeWallMaterial.specularTexture = new BABYLON.Texture("textures/masonry-wall-normal-map.jpg", scene);
+    cubeWallMaterial.emissiveTexture = new BABYLON.Texture("textures/Wall/masonry-wall-texture.jpg", scene);
+    cubeWallMaterial.bumpTexture = new BABYLON.Texture("textures/Wall/masonry-wall-bump-map.jpg", scene);
+    cubeWallMaterial.specularTexture = new BABYLON.Texture("textures/Wall/masonry-wall-normal-map.jpg", scene);
     var cubeMultiMat = new BABYLON.MultiMaterial("cubeMulti", scene);
     cubeMultiMat.subMaterials.push(cubeTopMaterial);
     cubeMultiMat.subMaterials.push(cubeWallMaterial);
@@ -202,7 +202,7 @@ window.onload = function () {
         buttons: {
             "Create": function () {
                 //Creating scene
-
+                reader.onload;
                 labScene = cargarLaberinto();
 
                 labScene.activeCamera.attachControl(canvas);
