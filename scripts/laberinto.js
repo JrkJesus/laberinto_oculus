@@ -32,6 +32,7 @@ function cargarLaberinto()
 
 
     // Activar camara de vision.
+    //https://github.com/BabylonJS/Babylon.js/wiki/05-Cameras
     freeCamera = new BABYLON.FreeCamera("free", new BABYLON.Vector3(0, 5, 0), scene);
     freeCamera.minZ = 1;
     freeCamera.speed = veloc;
@@ -43,6 +44,8 @@ function cargarLaberinto()
     // Aplicar Texturas suelo
         // Nota u = ejeX   
         //      v = ejeY
+
+        // ALGO FALLA AQUI.
     var groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
     groundMaterial.emissiveTexture = new BABYLON.Texture("textures/Ground/arfilaay.de_tiles-35_d100.jpg", scene);
     groundMaterial.emissiveTexture.uScale = largo;
@@ -64,7 +67,7 @@ function cargarLaberinto()
     var skybox = BABYLON.Mesh.CreateBox("skyBox", 800.0, scene);
     var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
     skyboxMaterial.backFaceCulling = false;
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/Skybox/sp2", scene); 
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/Skybox/skybox", scene); 
                                                 //CubeTexture(rootUrl, scene, extensions, noMipmap)
                                                     // rootUrl: Link of the texture
                                                     // extensions: The cube texture extensions. (Array)
@@ -84,14 +87,17 @@ function cargarLaberinto()
     light1.diffuse = new BABYLON.Color3(1, 0.7333333333333333, 0.3568627450980392);
     light1.intensity = 0.2;
 
+    //eatmap
+    
+
 
     // Crear cubo que formaran el laberinto.
     var cubeTopMaterial = new BABYLON.StandardMaterial("cubeTop", scene);
     cubeTopMaterial.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.15);
     var cubeWallMaterial = new BABYLON.StandardMaterial("cubeWalls", scene);
-    cubeWallMaterial.emissiveTexture = new BABYLON.Texture("textures/Wall/masonry-wall-texture.jpg", scene);
-    cubeWallMaterial.bumpTexture = new BABYLON.Texture("textures/Wall/masonry-wall-bump-map.jpg", scene);
-    cubeWallMaterial.specularTexture = new BABYLON.Texture("textures/Wall/masonry-wall-normal-map.jpg", scene);
+    cubeWallMaterial.emissiveTexture = new BABYLON.Texture("textures/Wall/ladrillos.jpg", scene);
+    cubeWallMaterial.bumpTexture = new BABYLON.Texture("textures/Wall/ladrillos.jpg", scene);
+    cubeWallMaterial.specularTexture = new BABYLON.Texture("textures/Wall/ladrillos.jpg", scene);
     var cubeMultiMat = new BABYLON.MultiMaterial("cubeMulti", scene);
     cubeMultiMat.subMaterials.push(cubeTopMaterial);
     cubeMultiMat.subMaterials.push(cubeWallMaterial);
@@ -114,11 +120,7 @@ function cargarLaberinto()
             if (mapa[fila].charAt(col).toLowerCase() == 'h') 
             {
                 cube = soloCube.clone("ClonedCube" + fila + col);
-                /*
-                cube.position = new BABYLON.Vector3(TAM_BLOQUE / 2 + (fila - (col / 2)) * TAM_BLOQUE,
-                                                    TAM_BLOQUE / 2,
-                                                    TAM_BLOQUE / 2 + (col - (fila / 2)) * TAM_BLOQUE);
-                */
+                
                 cube.position = new BABYLON.Vector3(TAM_BLOQUE / 2 + fila * TAM_BLOQUE,
                                                     TAM_BLOQUE/2,
                                                     TAM_BLOQUE / 2 + col * TAM_BLOQUE);
