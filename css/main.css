@@ -25,11 +25,11 @@ label, input {
     display: block;
 }
 
-    input.text {
-        margin-bottom: 12px;
-        width: 95%;
-        padding: .4em;
-    }
+input.text {
+    margin-bottom: 12px;
+    width: 95%;
+    padding: .4em;
+}
 
 fieldset {
     padding: 0;
@@ -43,4 +43,8 @@ fieldset {
     background: url('../textures/Portada.jpg') no-repeat 0 0;
     background-position: center;
     background-size: 100%;
+}
+
+input[ type = checkbox ] {
+    display: inline;
 }

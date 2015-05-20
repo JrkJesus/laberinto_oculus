@@ -3,16 +3,17 @@
 
 var TAM_BLOQUE = 8;
 
-var freeCamera, canvas, engine, labScene;
+var freeCamera, canvas, engine, labScene, salida;
 var camPositionInLabyrinth, camRotationInLabyrinth;
 var veloc = 0.5;
 var textoDoc;
-var vistaAerea = false;
+var vistaAerea = false, oculus, intra, extra;
+var inicio;
 
 
 function cargarLaberinto() 
 {   
-    //var mapa = ¿?
+    //var mapa = ¿?   textoDoc.split("\r\n")[0].split(": ")[1]
     var pasoIntermedio = textoDoc.split("\r\n"),
         ancho = parseInt(pasoIntermedio[0].split(": ")[1]),
         largo = parseInt(pasoIntermedio[1].split(": ")[1]),
@@ -33,7 +34,11 @@ function cargarLaberinto()
 
     // Activar camara de vision.
     //https://github.com/BabylonJS/Babylon.js/wiki/05-Cameras
-    freeCamera = new BABYLON.FreeCamera("free", new BABYLON.Vector3(0, 5, 0), scene);
+    if (oculus)
+        freeCamera = new BABYLON.OculusCamera("Camera", new BABYLON.Vector3(0, 20, -45), scene);
+    else
+        freeCamera = new BABYLON.FreeCamera("free", new BABYLON.Vector3(0, 5, 0), scene);
+    
     freeCamera.minZ = 1;
     freeCamera.speed = veloc;
     freeCamera.checkCollisions = true;
@@ -47,16 +52,16 @@ function cargarLaberinto()
 
         // ALGO FALLA AQUI.
     var groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
-    groundMaterial.emissiveTexture = new BABYLON.Texture("textures/Ground/arfilaay.de_tiles-35_d100.jpg", scene);
-    groundMaterial.emissiveTexture.uScale = largo;
-    groundMaterial.emissiveTexture.vScale = ancho;
-    groundMaterial.bumpTexture = new BABYLON.Texture("textures/Ground/arfilaay.de_tiles-35_b010.jpg", scene);
-    groundMaterial.bumpTexture.uScale = largo;
-    groundMaterial.bumpTexture.vScale = ancho;
-    groundMaterial.specularTexture = new BABYLON.Texture("textures/Ground/arfilaay.de_tiles-35_s100-g100-r100.jpg", scene);
-    groundMaterial.specularTexture.uScale = largo;
-    groundMaterial.specularTexture.vScale = ancho;
-    var ground = BABYLON.Mesh.CreateGround("ground", TAM_BLOQUE / 2 + (largo + 2) * TAM_BLOQUE, TAM_BLOQUE / 2 + (ancho + 2) * TAM_BLOQUE, 1, scene, false);
+    groundMaterial.emissiveTexture = new BABYLON.Texture("textures/Ground/suelo.jpg", scene);
+    groundMaterial.emissiveTexture.uScale = 400;
+    groundMaterial.emissiveTexture.vScale = 400;
+    groundMaterial.bumpTexture = new BABYLON.Texture("textures/Ground/suelo.jpg", scene);
+    groundMaterial.bumpTexture.uScale = 400;
+    groundMaterial.bumpTexture.vScale = 400;
+    groundMaterial.specularTexture = new BABYLON.Texture("textures/Ground/suelo.jpg", scene);
+    groundMaterial.specularTexture.uScale = 400;
+    groundMaterial.specularTexture.vScale = 400;
+    var ground = BABYLON.Mesh.CreateGround("ground", 400, 400, 1, scene, false);
                       // Mesh.CreateGround(name,       width,                    height, subdivisions, scene, updatable) 
     ground.material = groundMaterial; 
     ground.checkCollisions = true;
@@ -65,9 +70,13 @@ function cargarLaberinto()
 
     // Aplicar Textura Cielo
     var skybox = BABYLON.Mesh.CreateBox("skyBox", 800.0, scene);
-    var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+    var cielo = "skyBox";
+    if(!extra)
+        cielo = "default";
+    var skyboxMaterial = new BABYLON.StandardMaterial(cielo, scene);
+
     skyboxMaterial.backFaceCulling = false;
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/Skybox/skybox", scene); 
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("textures/Skybox/"+cielo, scene); 
                                                 //CubeTexture(rootUrl, scene, extensions, noMipmap)
                                                     // rootUrl: Link of the texture
                                                     // extensions: The cube texture extensions. (Array)
@@ -93,11 +102,15 @@ function cargarLaberinto()
 
     // Crear cubo que formaran el laberinto.
     var cubeTopMaterial = new BABYLON.StandardMaterial("cubeTop", scene);
-    cubeTopMaterial.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.15);
+    if (muro)
+        cubeTopMaterial.emissiveColor = new BABYLON.Color3(0.1, 0.1, 0.15);
+    else
+        cubeTopMaterial.emissiveTexture = new BABYLON.Texture("textures/Ground/suelo.jpg", scene);
+
     var cubeWallMaterial = new BABYLON.StandardMaterial("cubeWalls", scene);
-    cubeWallMaterial.emissiveTexture = new BABYLON.Texture("textures/Wall/ladrillos.jpg", scene);
-    cubeWallMaterial.bumpTexture = new BABYLON.Texture("textures/Wall/ladrillos.jpg", scene);
-    cubeWallMaterial.specularTexture = new BABYLON.Texture("textures/Wall/ladrillos.jpg", scene);
+    cubeWallMaterial.emissiveTexture = new BABYLON.Texture("textures/Wall/ladrillos2.jpg", scene);
+    cubeWallMaterial.bumpTexture = new BABYLON.Texture("textures/Wall/ladrillos2.jpg", scene);
+    cubeWallMaterial.specularTexture = new BABYLON.Texture("textures/Wall/ladrillos2.jpg", scene);
     var cubeMultiMat = new BABYLON.MultiMaterial("cubeMulti", scene);
     cubeMultiMat.subMaterials.push(cubeTopMaterial);
     cubeMultiMat.subMaterials.push(cubeWallMaterial);
@@ -112,12 +125,16 @@ function cargarLaberinto()
     soloCube.material = cubeMultiMat;
     soloCube.checkCollisions = true;
     soloCube.setEnabled(false);
-    var cube,x,y;
+    var cube,x,y,muroC;
+    if(muro)
+        muroC = 'h';
+    else
+        muroC = ' ';
     for (var fila = 0; fila < largo; fila++) 
     {
         for (var col = 0; col < ancho; col++) 
         {
-            if (mapa[fila].charAt(col).toLowerCase() == 'h') 
+            if (mapa[fila].charAt(col).toLowerCase() == muroC) 
             {
                 cube = soloCube.clone("ClonedCube" + fila + col);
                 
@@ -129,13 +146,50 @@ function cargarLaberinto()
             {
                 x = TAM_BLOQUE / 2 + fila * TAM_BLOQUE;
                 y = TAM_BLOQUE / 2 + col * TAM_BLOQUE;
+                if(!muro)
+                {
+                    cube = soloCube.clone("ClonedCube" + fila + col);
+                
+                    cube.position = new BABYLON.Vector3(TAM_BLOQUE / 2 + fila * TAM_BLOQUE,
+                                                        TAM_BLOQUE/2,
+                                                        TAM_BLOQUE / 2 + col * TAM_BLOQUE);
+                }
+            }
+            else if( mapa[fila].charAt(col).toLowerCase() == 's')
+            {
+                salida = new BABYLON.Vector3(TAM_BLOQUE / 2 + fila * TAM_BLOQUE, altura, TAM_BLOQUE / 2 + col * TAM_BLOQUE);
+                if(!muro)
+                {
+                    cube = soloCube.clone("ClonedCube" + fila + col);
+                
+                    cube.position = new BABYLON.Vector3(TAM_BLOQUE / 2 + fila * TAM_BLOQUE,
+                                                        TAM_BLOQUE/2,
+                                                        TAM_BLOQUE / 2 + col * TAM_BLOQUE);
+                }
             }
 
         }
     } 
-
-    freeCamera.position = new BABYLON.Vector3(x, 5, y);
+    var altura = 5;
+    if(!muro)
+        altura += TAM_BLOQUE;
+    freeCamera.position = new BABYLON.Vector3(x, altura, y);
     //Cambia la posicion a la entrada
+
+
+
+
+
+
+
+    scene.registerBeforeRender(function () {
+        if(freeCamera.position == salida)
+        {
+           var tiempo = inicio -  new Date().getTime();
+        }
+    });
+
+
 
      window.addEventListener("keydown", function (event) {
         if (event.keyCode === 32) {
@@ -205,10 +259,14 @@ window.onload = function () {
             "Create": function () {
                 //Creating scene
                 reader.onload;
+                /*
+                intra = $('input[name=check1]').is(':checked');
+                extra = $('input[name=check2]').is(':checked');*/
                 labScene = cargarLaberinto();
 
                 labScene.activeCamera.attachControl(canvas);
 
+                inicio =  new Date().getTime();
                 // Once the scene is loaded, just register a render loop to render it
                 engine.runRenderLoop(function () 
                 {
