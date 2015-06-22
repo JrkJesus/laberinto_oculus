@@ -2,28 +2,31 @@
 
 
 var TAM_BLOQUE = 8;
+var inicio;
 
 var freeCamera, canvas, engine, labScene, salida;
 var camPositionInLabyrinth, camRotationInLabyrinth;
 var veloc = 0.5;
 var textoDoc;
-var vistaAerea = false, oculus, intra, extra;
-var inicio;
+var vistaAerea = false, oculus, intra, extra, tiempoUP = true;
+var tiempo, tiempoT, contador = 0;
+var camino = [];
+var x, y, knot, cockie;
 
 
 function cargarLaberinto() 
 {   
     //var mapa = ¿?   textoDoc.split("\r\n")[0].split(": ")[1]
     var pasoIntermedio = textoDoc.split("\r\n"),
-        ancho = parseInt(pasoIntermedio[0].split(": ")[1]),
-        largo = parseInt(pasoIntermedio[1].split(": ")[1]),
+        name = pasoIntermedio[0].split(": ")[1],
+        ancho = parseInt(pasoIntermedio[1].split(": ")[1]),
+        largo = parseInt(pasoIntermedio[2].split(": ")[1]),
         mapa = [];
-    for(var index = 2; index<largo+2; index++)
+    for(var index = 0; index<largo; index++)
     {
-        mapa[index-2] += pasoIntermedio[index];
-        mapa[index-2] = mapa[index-2].replace(/undefined/i, "");
+        mapa[index] += pasoIntermedio[index + 3];
+        mapa[index] = mapa[index].replace(/undefined/i, "");
     }
-
 
     // Crear la escene a la cual le meteremos los elementos del mapa.
     var scene = new BABYLON.Scene(engine);
@@ -34,17 +37,12 @@ function cargarLaberinto()
 
     // Activar camara de vision.
     //https://github.com/BabylonJS/Babylon.js/wiki/05-Cameras
-    if (oculus)
-        freeCamera = new BABYLON.OculusCamera("Camera", new BABYLON.Vector3(0, 20, -45), scene);
-    else
-        freeCamera = new BABYLON.FreeCamera("free", new BABYLON.Vector3(0, 5, 0), scene);
-    
+    freeCamera = new BABYLON.FreeCamera("free", new BABYLON.Vector3(0, 5, 0), scene);
     freeCamera.minZ = 1;
-    freeCamera.speed = veloc;
+    freeCamera.speed = 0.5;
     freeCamera.checkCollisions = true;
     freeCamera.applyGravity = true;
     freeCamera.ellipsoid = new BABYLON.Vector3(1, 1, 1);
-
 
     // Aplicar Texturas suelo
         // Nota u = ejeX   
@@ -61,7 +59,7 @@ function cargarLaberinto()
     groundMaterial.specularTexture = new BABYLON.Texture("textures/Ground/suelo.jpg", scene);
     groundMaterial.specularTexture.uScale = 400;
     groundMaterial.specularTexture.vScale = 400;
-    var ground = BABYLON.Mesh.CreateGround("ground", 400, 400, 1, scene, false);
+    var ground = BABYLON.Mesh.CreateGround("ground", largo*TAM_BLOQUE*2, ancho*TAM_BLOQUE*2, 1, scene, false);
                       // Mesh.CreateGround(name,       width,                    height, subdivisions, scene, updatable) 
     ground.material = groundMaterial; 
     ground.checkCollisions = true;
@@ -125,7 +123,7 @@ function cargarLaberinto()
     soloCube.material = cubeMultiMat;
     soloCube.checkCollisions = true;
     soloCube.setEnabled(false);
-    var cube,x,y,muroC;
+    var cube,muroC;
     if(muro)
         muroC = 'h';
     else
@@ -167,31 +165,181 @@ function cargarLaberinto()
                                                         TAM_BLOQUE / 2 + col * TAM_BLOQUE);
                 }
             }
+            else if(mapa[fila].charAt(col).toLowerCase() == 'o')
+            {
+
+                if(intra)
+                {
+                    var sphere = BABYLON.Mesh.CreateSphere("sphere", TAM_BLOQUE/2, TAM_BLOQUE/2, scene);
+                    sphere.position = new BABYLON.Vector3(TAM_BLOQUE / 2 + fila * TAM_BLOQUE,
+                                                        TAM_BLOQUE/2,
+                                                        TAM_BLOQUE / 2 + col * TAM_BLOQUE);
+                }
+            }
 
         }
     } 
-    var altura = 5;
+    var altura = TAM_BLOQUE / 2;
     if(!muro)
         altura += TAM_BLOQUE;
+    salida.y = altura;
     freeCamera.position = new BABYLON.Vector3(x, altura, y);
+ //   camino.push(freeCamera.clone());
     //Cambia la posicion a la entrada
 
+    if (oculus)
+    {
+        var originCamera = scene.activeCamera;
 
+        scene.activeCamera = new BABYLON.OculusCamera("Oculus", originCamera.position, scene);
 
-
-
-
-
+        scene.activeCamera.minZ = originCamera.minZ;
+        scene.activeCamera.maxZ = originCamera.maxZ;
+        scene.activeCamera.gravity = originCamera.gravity;
+        scene.activeCamera.checkCollisions = true;
+        scene.activeCamera.applyGravity = true;
+        scene.activeCamera.speed = originCamera.speed;
+        scene.activeCamera.rotation.copyFrom(originCamera.rotation);
+        //freeCamera = new BABYLON.OculusCamera("Camera", new BABYLON.Vector3(0, 20, -45), scene);
+    }
+    
     scene.registerBeforeRender(function () {
-        if(freeCamera.position == salida)
+
+        if(tiempoUP)
+            camino.push([freeCamera.position.clone(), freeCamera.rotation.clone(), new Date().getTime()]);
+
+
+        if( freeCamera.position.x - TAM_BLOQUE < salida.x 
+                && freeCamera.position.x + TAM_BLOQUE > salida.x
+                && freeCamera.position.z - TAM_BLOQUE < salida.z 
+                && freeCamera.position.z + TAM_BLOQUE > salida.z )
         {
-           var tiempo = inicio -  new Date().getTime();
+            if(tiempoUP)
+            {
+               
+                tiempoUP = false;
+                tiempo = new Date().getTime() - inicio;
+
+                cockie = getCookie(name);
+                console.log(cockie);
+
+               
+               
+                $("#dialog-form-winner").dialog({
+                    autoOpen: true,
+                    height: 300,
+                    width: 350,
+                    modal: true,
+                    open: function(event, ui)
+                    {
+                       //  $("#dialog-form-winner").beforeprint(tiempo);
+                    },
+                    buttons: {
+                        "Submit" : function() {
+                            var c =  obtCookie();
+                            setCookie(name, c, 100000);
+                        },
+                        "Reiniciar": function () {
+                            freeCamera.position = new BABYLON.Vector3(x, altura, y);
+                            labScene.activeCamera.attachControl(canvas);
+                            camino = [],
+                            tiempoUP = true;
+                            inicio =  new Date().getTime();
+                            canvas.className = "offScreen onScreen";
+                            $(this).dialog("close");
+                        },
+                        "Camino": function(){
+                            $(this).dialog("close");
+                            camPositionInLabyrinth = freeCamera.position;
+                            camRotationInLabyrinth = freeCamera.rotation;
+                            
+                            freeCamera.position = camino[0][0];
+                            freeCamera.rotation = camino[0][1];
+                            cambiarCam(freeCamera, 1);
+                            /*var i = 0;
+                            while(i<camino.length) 
+                            {
+                                //cambiarCam(freeCamera, camino[i][0], camino[i++][1])
+                                var param1 = camino[i][0];
+                                var param2 = camino[i][1];
+                                for(var k = )
+                                setTimeout(cambiarCam, 1000, freeCamera, param1, param2);
+                               //  setTimeout(cambiarCam, 1000, freeCamera, camino[i][0], camino[i][1]); 
+                                 i++;
+                            }*/
+                            $(this).dialog("close");
+                        },
+                        "Nuevo": function(){
+                            $(this).dialog("close");
+                            $("#dialog-form").dialog({
+                                autoOpen: true,
+                                height: 300,
+                                width: 350,
+                                modal: true,
+                                buttons: {
+                                    "Create": function () {
+                                        //Creating scene
+                                        reader.onload;
+                                        /*
+                                        intra = $('input[name=check1]').is(':checked');
+                                        extra = $('input[name=check2]').is(':checked');*/
+                                        labScene = cargarLaberinto();
+
+                                        labScene.activeCamera.attachControl(canvas);
+
+                                        //inicio =  new Date().getTime();
+                                        // Once the scene is loaded, just register a render loop to render it
+                                        engine.runRenderLoop(function () 
+                                        {
+                                            labScene.render();
+                                        });
+
+                                        canvas.className = "offScreen onScreen";
+                                        $(this).dialog("close");
+                                    }
+                                }
+                            });
+                        }     
+                    }
+                });
+            }
         }
     });
 
+    window.addEventListener("keydown", function (event) 
+    {
+        if (event.keyCode === 82) //codigo de la o
+        {
+            freeCamera.position = new BABYLON.Vector3(x, altura, y);
+                        labScene.activeCamera.attachControl(canvas);
+                        tiempoUP = true;
+                        inicio =  new Date().getTime();
+                        camino = [];
+        }
+        else if (event.keyCode === 79) //codigo de la o
+        {
+            if(intra)
+            {
+                var sphere = BABYLON.Mesh.CreateSphere("sphere"+contador, TAM_BLOQUE/2, TAM_BLOQUE/2, scene);
+                sphere.position = freeCamera.position;
+                contador++;
+            }
+        }
+        else if(event.keyCode === 107)
+        {
+            if (freeCamera.speed < 1.5)
+                freeCamera.speed += 0.2;
+        }
+        else if(event.keyCode === 109)
+        {
+            if (freeCamera.speed > 0.5)
+                freeCamera.speed -= 0.2;
+        }
 
+    }, false);
 
      window.addEventListener("keydown", function (event) {
+       
         if (event.keyCode === 32) {
             if (!vistaAerea) {
                 vistaAerea = true;
@@ -211,41 +359,15 @@ function cargarLaberinto()
             freeCamera.applyGravity = !vistaAerea;
         }
     }, false);
-    /*
-    window.addEventListener("keydown", function (event) 
-    {
-        if (event.keyCode === 79) //codigo de la o
-        {
-           window.addEventListener("keydown", function (event) 
-            {
-                switch(event.keyCode) 
-                {
-                    case tecla del obj:
-                        //creo objeto en freeCampera.position
-                        break;
-                }
-            }, false);
-        }
-    }, false);*/
-
-    window.addEventListener("keydown", function (event) 
-    {
-        if (event.keyCode === 18) //codigo del alt
-        {
-            veloc=1;  
-        }
-    }, false);
-
-    window.addEventListener("keyup", function (event) 
-    {
-        if (event.keyCode === 18) //codigo del alt
-        {
-            veloc=0.5;  
-        }
-    }, false);
+    
 
     return scene;
 };
+
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+    while((new Date().getTime() - start) > milliseconds);
+}
 
 window.onload = function () {
     canvas = document.getElementById("canvas");
@@ -275,7 +397,32 @@ window.onload = function () {
 
                 canvas.className = "offScreen onScreen";
                 $(this).dialog("close");
-            }
+            }/*,
+            "Sencillo": function() {
+
+                var formu = $("#miFormulario");
+
+                oculus = formu.checkOculus.checked;
+                intra = document.miFormulario.checkIntra.checked;
+                extra = document.miFormulario.checkExtra.checked;
+                muro = document.miFormulario.checkMuros.checked;
+
+                textoDoc = " "
+
+                labScene = cargarLaberinto();
+
+                labScene.activeCamera.attachControl(canvas);
+
+                inicio =  new Date().getTime();
+                // Once the scene is loaded, just register a render loop to render it
+                engine.runRenderLoop(function () 
+                {
+                    labScene.render();
+                });
+
+                canvas.className = "offScreen onScreen";
+                $(this).dialog("close");
+            }*/
         }
     });
 
@@ -292,6 +439,20 @@ window.onload = function () {
         });
     }
 };
+
+function cambiarCam(freeCamera, index)
+{
+    setTimeout(function(){  
+    freeCamera.position = camino[index][0];
+    freeCamera.rotation = camino[index][1];
+
+    if(index+1 < camino.length)
+        cambiarCam(freeCamera, index+1);
+    else{
+        $("#dialog-form-winner").dialog();
+    }
+    }, camino[index][2]-camino[index-1][2]);
+}
 
 var animateCameraPositionAndRotation = function (freeCamera, fromPosition, toPosition, fromRotation, toRotation) 
 {
@@ -331,3 +492,100 @@ var animateCameraPositionAndRotation = function (freeCamera, fromPosition, toPos
 
     labScene.beginAnimation(freeCamera, 0, 100, false);
 };
+
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+  
+    var c = cname + "=" + cvalue + "; " + expires;
+    document.cookie = c;
+    console.log(c);
+} 
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+    }
+    return "";
+} 
+
+function ver()
+{
+    var vecCockie = cockie.split("$jc");
+    var encontrado = false;
+    var i = 0, cont = 1;
+    var clasificacion = "";
+    while(!encontrado && i<vecCockie.length)
+    {
+        if(vecCockie[i] != "")
+        {
+            var temp = vecCockie[i].split(" - ")[1];
+            if(temp > tiempo)
+            {
+                clasificacion += cont + ".- " +  $("#name").val() + " - " + tiempo + "\n";
+                encontrado = true;
+                cont++;
+            }
+            clasificacion += cont + ".- " + vecCockie[i] + "\n";
+            cont++;
+        }
+        i++;
+      
+    }
+    if(encontrado)
+    {
+        for(var j = i; j<vecCockie.length; j++)
+        {
+            if(vecCockie[i] != "")
+            {
+                clasificacion += cont + ".- " + vecCockie[i] + "\n";
+                cont++;
+            }
+        }
+    }
+    else
+        clasificacion +=  cont + ".- "  + $("#name").val() + " - " + tiempo + "<------ TU CLASIFICACION ";
+
+
+    return clasificacion;
+}
+
+function obtCookie()
+{
+    var vecCockie = cockie.split("$jc");
+    var encontrado = false;
+    var i = 0;
+    var clasificacion = "";
+    while(!encontrado && i<vecCockie.length)
+    {
+        if(vecCockie != "")
+        {
+            var temp = vecCockie[i].split(" - ")[1];
+            if(temp > tiempo)
+            {
+                clasificacion += $("#name").val() + " - " + tiempo + "$jc";
+                encontrado = true;
+            }
+            clasificacion += vecCockie[i] + "$jc";
+        }
+        i++;
+    }
+    if(encontrado)
+        for(var j = i; j<vecCockie.length; j++)
+            clasificacion += vecCockie[i] + "$jc";
+    else
+        clasificacion += $("#name").val() + " - " + tiempo + "$jc";
+
+
+    return clasificacion;
+}
+
+function timeLab()
+{  
+    return tiempo;
+}

@@ -48,3 +48,9 @@ fieldset {
 input[ type = checkbox ] {
     display: inline;
 }
+
+input[ type = button ] {
+    position: relative;
+    top: 170px;
+}
+

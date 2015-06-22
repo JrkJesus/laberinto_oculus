@@ -27,7 +27,7 @@
 <body>
     <canvas id="canvas" class="offScreen"></canvas>
     <div id="dialog-form" title="Create Labyrinth">
-        
+         <input type="button" onclick="alert('La definición del archivo a ejecutar deberá seguir la siguiente estructura:\n\tnombre: nombreMapa\n \tancho: valorAncho \n\tlargo: valorLargo \n\tmapa \n\nLos posibles valores de dicho mapa serán: \n\tH: Muro. \n\tO: Esfera (Elemento intralaberíntico).  \n\tE: Entrada (Posición inicial). \n\tS: Salida (Posición final). \n\nLos controles del juegos son: \n\tflechas \t-> Para moverte por el mapa \n\t   \'+\' \t\t-> para aumentar la velocidad \n\t   \'-\' \t\t-> para disminuir la velocidad \n\t   \'r\' \t\t-> para reiniciar')" value="Instruciones">
            <style>
                 #progress_bar {
                     margin: 10px 0;
@@ -139,6 +139,16 @@
         -->
     </div>
     <div id="logo">
+    </div>
+    <div id="dialog-form-winner" title="ENHORABUENA, LO HAS COMPLETADO!">
+        <input type="button" onclick="alert(timeLab())" value="Mostrar tiempo (ms)">
+        <input type="button" onclick="alert(ver())" value="Mostrar clasificacion">
+        <form>
+            <fieldset>
+                <label for="name">Introduce tu nombre</label>
+                <input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all">
+            </fieldset>
+        </form>
     </div>
 </body>
 </html>

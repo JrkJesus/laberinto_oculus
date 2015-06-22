@@ -1,3 +1,4 @@
+nombre: complicado
 ancho: 50
 largo: 38
 HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
@@ -22,7 +23,7 @@ H          HH       H     H          HHH         H
 H          H        HH                           H
 H          H  HHHHHH H                           H
 H          H  H      H    HHHHHHHHHHHHHHHHHHHHHHHH
-H          H  H      H    H    HH                H
+H          H  H      H    H    H                 H
 H          H  H      H    H  sH  HHHHHHHHHHHHHH  H
 H          H  H      HHHHHH                   H  H
 H             H          HHHH                HH  H
