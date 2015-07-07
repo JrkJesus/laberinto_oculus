@@ -189,6 +189,7 @@ function cargarLaberinto()
 
     if (oculus)
     {
+        
         var originCamera = scene.activeCamera;
 
         scene.activeCamera = new BABYLON.OculusCamera("Oculus", originCamera.position, scene);

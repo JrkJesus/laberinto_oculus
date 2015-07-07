@@ -13,7 +13,7 @@ H    HHHHHHHHHHHHHHHHH  H    H H H H H H H H H H H
 H                       H    H H H H H H H H H H H
 HHHHHHHHHHHHHHHHHHHHHHHHH    HHHHHHHHHHHHHHHHHHHHH
 H                             HHHHHHHHHHHHHHHHH  H
-H    HHHHHHHHHHHHHHHH                            H
+H    HHHHHHHHHHHHHHHH     o                      H
 H               HH  H     H     HH         HH    H
 H              HH   H     H      HH       HH     H
 H             HH    H     H       HH     HH      H
@@ -24,18 +24,18 @@ H          H        HH                           H
 H          H  HHHHHH H                           H
 H          H  H      H    HHHHHHHHHHHHHHHHHHHHHHHH
 H          H  H      H    H    H                 H
-H          H  H      H    H  sH  HHHHHHHHHHHHHH  H
+H o        H  H      H    H  sH  HHHHHHHHHHHHHH  H
 H          H  H      HHHHHH                   H  H
 H             H          HHHH                HH  H
 H   HHH     HHH             HH               HH  H
-H  H          H              HH             HH   H
+H  H          H         o    HH             HH   H
 H H            H             HH            HH    H
 H H             H       HH    HH          HH     H
 H H             H       H     HH         HH      H
-H H             H       H      HH       HH       H
+H H             H       H      HH       HH    o  H
 H  H            H       H       HH     HH        H
 H   H           H       H        HH   HH         H
 H    H         H        H         HHHHH          H
-H     H       H         H          HHH           H
+H     H     o H         H          HHH           H
 H      H                H                        H
 HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
