@@ -189,7 +189,7 @@ function cargarLaberinto()
 
     if (oculus)
     {
-        /* ORIGINAL*/
+        /* ORIGINAL
         var originCamera = scene.activeCamera;
 
         scene.activeCamera = new BABYLON.OculusCamera("Oculus", originCamera.position, scene);
@@ -201,15 +201,15 @@ function cargarLaberinto()
         scene.activeCamera.applyGravity = true;
         scene.activeCamera.speed = originCamera.speed;
         scene.activeCamera.rotation.copyFrom(originCamera.rotation);
-
-        /* Falla!! 
+        */
+        /* Falla!! */
         var originCamera = scene.activeCamera;
         scene.activeCamera = null;
         scene.activeCameras = [];
         scene.autoClear = true;
-        scene.activeCamera = BABYLON.OculusOrientedCamera.BuildOculusStereoCamera, "Oculus", originCamera.minZ, originCamera.maxZ, 
+        scene.activeCamera = BABYLON.OculusOrientedCamera.BuildOculusStereoCamera( scene, "Oculus", originCamera.minZ, originCamera.maxZ, 
             originCamera.position, {yaw: 3, Pitch: 0, roll: 0}, true, false, false,  originCamera.gravity);  // Shape of the camera 
-        */
+        
     }
     
     scene.registerBeforeRender(function () {
